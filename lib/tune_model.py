@@ -9,6 +9,7 @@ import pyprind
 import matplotlib.pyplot as plt
 
 from lib.evaluate_function import evaluate_function
+from lib.format_channel_function import format_channel_function
 
 def tune_model(tuning_parameters, model_function, input_data, output_data, output_dir=None, subfolder_name=None):
     
@@ -117,6 +118,17 @@ def tune_model(tuning_parameters, model_function, input_data, output_data, outpu
                         product_function["shift"],
                         *product_function["parameters"])
         print()
+        
+        # Save tuned channel function to file if needed
+        if save_data:
+            # Format channel function strings
+            y_str_template, y_str_estimate, y_str_mappings = format_channel_function(channel_function, channel_id+1)
+            channel_str_detailed = y_str_template + '\n\n' + y_str_mappings + '\n\n' + y_str_estimate + '\n\n'
+            
+            # Save to tuned_equation.txt file
+            equation_file_path = os.path.join(ga_dir, 'tuned_equation.txt')
+            with open(equation_file_path, 'a') as f:
+                f.write(channel_str_detailed)
         
         # Plot GA tuning metrics.
         if save_data == True or visual == True:
