@@ -3,6 +3,7 @@
 
 import copy
 import os
+import numpy as np
 
 from lib.create_model import create_model
 from lib.analyze_model import analyze_model
@@ -52,36 +53,43 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
     print("New mask")
     print(new_mask)
     print()
-    model_dictionary_v2 = create_model(model_parameters, input_data, output_data, new_mask,
-                                      output_dir=estimate_dir, subfolder_name='model_masked')
-    model_function_v2, _ = analyze_model(analysis_parameters, model_dictionary_v2,
-                                         input_data, output_data, new_mask,
-                                         output_dir=estimate_dir, subfolder_name='analysis_masked')
-    metrics_v2 = evaluate_function(model_function_v2, input_data, output_data)
     
-    for channel_id, channel_metrics in enumerate(metrics_v2):
-        print("Channel y" + str(channel_id+1) + " metrics")
-        print("MAE  : " + str(FORMAT%channel_metrics["MAE"]))
-        print("RMSE : " + str(FORMAT%channel_metrics["RMSE"]))
-        print("MAX  : " + str(FORMAT%channel_metrics["MAX"]))
-        print("MIN  : " + str(FORMAT%channel_metrics["MIN"]))
-        print()
+    if (np.all(new_mask == 1)):
+        # Skip retraining if mask is all 1s
+        model_function_v3 = model_function_v1
+        metrics_v3 = metrics_v1
+        print("Mask is all 1s, skipping masked retraining and analysis.")
+    else:
+        model_dictionary_v2 = create_model(model_parameters, input_data, output_data, new_mask,
+                                          output_dir=estimate_dir, subfolder_name='model_masked')
+        model_function_v2, _ = analyze_model(analysis_parameters, model_dictionary_v2,
+                                             input_data, output_data, new_mask,
+                                             output_dir=estimate_dir, subfolder_name='analysis_masked')
+        metrics_v2 = evaluate_function(model_function_v2, input_data, output_data)
         
-    model_function_v3 = []
-    metrics_v3 = []
-    for c in range(0, len(metrics_v2)):
-        if metrics_v2[c]["MAE"] < metrics_v1[c]["MAE"]:
-            print("Channel y" + str(c+1) + " improved")
-            print("Continuing with function from masked model")
-            model_function_v3.append(model_function_v2[c])
-            metrics_v3.append(metrics_v2[c])
-        else:
-            print("Channel y" + str(c+1) + " did not improve")
-            print("Continuing with function from previous model")
-            model_function_v3.append(model_function_v1[c])
-            metrics_v3.append(metrics_v1[c])
-        print("MAE  : " + str(FORMAT%metrics_v1[c]["MAE"]) + " -> " + str(FORMAT%metrics_v2[c]["MAE"]))
-        print("RMSE : " + str(FORMAT%metrics_v1[c]["RMSE"]) + " -> " + str(FORMAT%metrics_v2[c]["RMSE"]))
+        for channel_id, channel_metrics in enumerate(metrics_v2):
+            print("Channel y" + str(channel_id+1) + " metrics")
+            print("MAE  : " + str(FORMAT%channel_metrics["MAE"]))
+            print("RMSE : " + str(FORMAT%channel_metrics["RMSE"]))
+            print("MAX  : " + str(FORMAT%channel_metrics["MAX"]))
+            print("MIN  : " + str(FORMAT%channel_metrics["MIN"]))
+            print()
+            
+        model_function_v3 = []
+        metrics_v3 = []
+        for c in range(0, len(metrics_v2)):
+            if metrics_v2[c]["MAE"] < metrics_v1[c]["MAE"]:
+                print("Channel y" + str(c+1) + " improved")
+                print("Continuing with function from masked model")
+                model_function_v3.append(model_function_v2[c])
+                metrics_v3.append(metrics_v2[c])
+            else:
+                print("Channel y" + str(c+1) + " did not improve")
+                print("Continuing with function from previous model")
+                model_function_v3.append(model_function_v1[c])
+                metrics_v3.append(metrics_v1[c])
+            print("MAE  : " + str(FORMAT%metrics_v1[c]["MAE"]) + " -> " + str(FORMAT%metrics_v2[c]["MAE"]))
+            print("RMSE : " + str(FORMAT%metrics_v1[c]["RMSE"]) + " -> " + str(FORMAT%metrics_v2[c]["RMSE"]))
     print()
     
     # Check if data fits the model and re-analyze if needed.
