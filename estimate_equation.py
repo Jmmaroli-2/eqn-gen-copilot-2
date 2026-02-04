@@ -206,7 +206,7 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
     
     print("Final estimation")
     print("============================================================")
-    # Print GA tuned equations.
+    # Print final equations.
     for idc, channel_function in enumerate(model_function_v5):
         y_str = "y" + str(idc+1) + "[k] = "
         for idf, product_function in enumerate(channel_function):
