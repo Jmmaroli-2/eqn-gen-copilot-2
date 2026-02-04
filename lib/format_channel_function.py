@@ -43,7 +43,7 @@ def format_channel_function(channel_function, channel_number):
     # Build the equations term by term
     for idf, product_function in enumerate(channel_function):
         template = product_function["template_string"]
-        estimate = product_function["estimate_string"] if product_function["estimate_string"] is not None else "0"
+        estimate = product_function["estimate_string"] if product_function["estimate_string"] is not None else product_function["template_string"]
 
         # Append to the main template equation
         y_str_template += template
@@ -59,7 +59,7 @@ def format_channel_function(channel_function, channel_number):
     mapping_lines = []
     for product_function in channel_function:
         template = product_function["template_string"]
-        estimate = product_function["estimate_string"] if product_function["estimate_string"] is not None else "0"
+        estimate = product_function["estimate_string"] if product_function["estimate_string"] is not None else product_function["template_string"]
         mapping_lines.append(f"{template} = {estimate}")
     
     y_str_mappings = "\n".join(mapping_lines)
