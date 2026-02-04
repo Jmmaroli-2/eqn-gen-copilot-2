@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from lib.evaluate_function import evaluate_function
 
-def tune_model(tuning_parameters, model_function, input_data, output_data, output_dir=None):
+def tune_model(tuning_parameters, model_function, input_data, output_data, output_dir=None, subfolder_name=None):
     
     population_size = tuning_parameters["ga_population"]
     generation_count = tuning_parameters["ga_generations"]
@@ -21,12 +21,13 @@ def tune_model(tuning_parameters, model_function, input_data, output_data, outpu
     np.random.seed(seed)
     
     if save_data == True:
-        # Setup the most recent analysis directory to store GA tuning metrics.
-        if output_dir is not None:
-            os.makedirs(output_dir, exist_ok=True)
+        if output_dir is not None and subfolder_name is not None:
+            # Use the provided output directory and subfolder name
+            ga_dir = os.path.join(output_dir, subfolder_name)
+            os.makedirs(ga_dir, exist_ok=False)
         else:
             # Throw an exception if data is to be saved without specified directory
-            raise ValueError('output_dir must be specified to save data.')
+            raise ValueError('output_dir and subfolder_name must be specified to save data.')
     
     # Tune each channel individually.
     model_function_tuned = copy.deepcopy(model_function)
@@ -124,12 +125,7 @@ def tune_model(tuning_parameters, model_function, input_data, output_data, outpu
             plt.title('Top MAE vs Generation')
             plt.xlabel('Generation')
             plt.ylabel('MAE')
-            if save_data == True:
-                mae_plot_path = os.path.join(output_dir, 'ga_mae.pdf')
-                if os.path.exists(mae_plot_path):
-                    raise FileExistsError(f'GA MAE plot already exists: {mae_plot_path}')
-                else:
-                    plt.savefig(mae_plot_path)
+            if save_data == True: plt.savefig(os.path.join(ga_dir, 'ga_mae.pdf'))
             if visual == True: plt.show()
         
     return model_function_tuned

@@ -183,7 +183,7 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
     print("Genetic algorithm tuning")
     print("============================================================")
     model_function_v4 = tune_model(tuning_parameters, model_function_v3, input_data, output_data, 
-                                   output_dir=estimate_dir)
+                                   output_dir=estimate_dir, subfolder_name='ga_tuning')
     metrics_v4 = evaluate_function(model_function_v4, input_data, output_data)
     
     # Examine the GA tuned equation for each channel for improvement.
