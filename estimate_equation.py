@@ -209,21 +209,17 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
     print("Final estimation")
     print("============================================================")
     
-    # Save final system equation to file
+    # Save and print final system equations
     final_equation_path = os.path.join(estimate_dir, 'final_equation.txt')
     with open(final_equation_path, 'w') as f:
         for channel_id, channel_function in enumerate(model_function_v5):
             # Format channel function strings
             y_str_template, y_str_estimate, y_str_mappings = format_channel_function(channel_function, channel_id+1)
             channel_str_detailed = y_str_template + '\n\n' + y_str_mappings + '\n\n' + y_str_estimate + '\n\n'
+            
+            # Save to file
             f.write(channel_str_detailed)
-    
-    # Print final system equations.
-    for idc, channel_function in enumerate(model_function_v5):
-        y_str = "y" + str(idc+1) + "[k] = "
-        for idf, product_function in enumerate(channel_function):
-            y_str = y_str + product_function["estimate_string"]
-            if idf < len(channel_function) - 1:
-                y_str = y_str + " + "
-        print(y_str)
-        print()
+            
+            # Print to console
+            print(y_str_estimate)
+            print()
