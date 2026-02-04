@@ -15,27 +15,18 @@ def tune_model(tuning_parameters, model_function, input_data, output_data, outpu
     population_size = tuning_parameters["ga_population"]
     generation_count = tuning_parameters["ga_generations"]
     visual = tuning_parameters["visual"]
-    save_visual = tuning_parameters["save_visual"]
+    save_data = tuning_parameters["save_data"]
     seed = tuning_parameters["seed"]
     
     np.random.seed(seed)
     
-    if save_visual == True:
+    if save_data == True:
         # Setup the most recent analysis directory to store GA tuning metrics.
         if output_dir is not None:
-            # Use the provided output directory
-            analysis_dir = output_dir
+            os.makedirs(output_dir, exist_ok=True)
         else:
-            # Fallback to legacy behavior: use the most recent analysis directory
-            if not os.path.exists('./output'):
-                os.mkdir('./output')
-            analysis_dir_count = 1
-            while os.path.exists('./output/analysis_{}'.format(analysis_dir_count)):
-                analysis_dir_count = analysis_dir_count + 1
-            analysis_dir_count = analysis_dir_count - 1
-            analysis_dir = './output/analysis_{}'.format(analysis_dir_count)
-            if not os.path.exists(analysis_dir):
-                os.mkdir(analysis_dir)
+            # Throw an exception if data is to be saved without specified directory
+            raise ValueError('output_dir must be specified to save data.')
     
     # Tune each channel individually.
     model_function_tuned = copy.deepcopy(model_function)
@@ -127,13 +118,18 @@ def tune_model(tuning_parameters, model_function, input_data, output_data, outpu
         print()
         
         # Plot GA tuning metrics.
-        if save_visual == True or visual == True:
+        if save_data == True or visual == True:
             plt.figure()
             plt.plot(top_heuristic)
             plt.title('Top MAE vs Generation')
             plt.xlabel('Generation')
             plt.ylabel('MAE')
-            if save_visual == True: plt.savefig(os.path.join(analysis_dir, 'ga_mae.pdf'))
+            if save_data == True:
+                mae_plot_path = os.path.join(output_dir, 'ga_mae.pdf')
+                if os.path.exists(mae_plot_path):
+                    raise FileExistsError(f'GA MAE plot already exists: {mae_plot_path}')
+                else:
+                    plt.savefig(mae_plot_path)
             if visual == True: plt.show()
         
     return model_function_tuned

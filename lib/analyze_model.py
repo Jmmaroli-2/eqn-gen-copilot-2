@@ -33,7 +33,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
     np.random.seed(seed)
     verbose = analysis_parameters["verbose"]
     visual = analysis_parameters["visual"]
-    save_visual = analysis_parameters["save_visual"]
+    save_data = analysis_parameters["save_data"]
     
     # Check inputs for validity.
     if sweep_initial < 1:
@@ -67,20 +67,14 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
     sig_y_t = torch.tensor(sig_y, dtype=torch.float)
     
     # Get the current data output folder if saving data and plots.
-    if save_visual == True:
+    if save_data == True:
         if output_dir is not None and subfolder_name is not None:
             # Use the provided output directory and subfolder name
             analysis_dir = os.path.join(output_dir, subfolder_name)
-            os.makedirs(analysis_dir, exist_ok=True)
+            os.makedirs(analysis_dir, exist_ok=False)
         else:
-            # Fallback to legacy behavior for backward compatibility
-            if not os.path.exists('./output'):
-                os.mkdir('./output')
-            analysis_dir_count = 1
-            while os.path.exists('./output/analysis_{}'.format(analysis_dir_count)):
-                analysis_dir_count = analysis_dir_count + 1
-            analysis_dir = './output/analysis_{}'.format(analysis_dir_count)
-            os.mkdir(analysis_dir)
+            # Throw an exception if data is to be saved without specified directory
+            raise ValueError('output_dir and subfolder_name must be specified to save data.')
 
     # Generate every possible combination of impulses.
     if history < history_eff:
@@ -419,7 +413,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
                                 print("")
                                 
                     # Plot 2D and 3D data with fitted function for visual inspection.
-                    if (save_visual or visual) and (arg_count == 1 or arg_count == 2):
+                    if (save_data or visual) and (arg_count == 1 or arg_count == 2):
                         visual_dir = os.path.join(analysis_dir, 'y{}_visuals'.format(channel_id+1))
                         os.makedirs(visual_dir, exist_ok=True)
                         
@@ -453,12 +447,12 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
                             ax.set_ylabel(f_list[1])
                             ax.legend()
                             
-                        if save_visual == True:
+                        if save_data == True:
                                 plt.savefig('{}/{}.pdf'.format(visual_dir, product_function["template_string"]))
                         if visual == True: plt.show()
                         
                     # Save HDF5 data for all product functions.
-                    if save_visual:
+                    if save_data:
                         # Calculate fitted output for all data points
                         y_fit = product_function["function"]["fcn"](x_data_fit, *product_function["parameters"])
                         
@@ -577,7 +571,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
         print()
 
         # Save to file if needed
-        if save_visual:
+        if save_data:
             equation_file_path = os.path.join(analysis_dir, 'system_equation.txt')
             with open(equation_file_path, 'a') as f:
                 f.write(y_str_template + '\n')
