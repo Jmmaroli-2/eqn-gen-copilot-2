@@ -8,6 +8,7 @@ from lib.create_model import create_model
 from lib.analyze_model import analyze_model
 from lib.evaluate_function import evaluate_function
 from lib.tune_model import tune_model
+from lib.format_channel_function import format_channel_function
 
 FORMAT = '%.3e'
 
@@ -204,6 +205,15 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
         print("RMSE : " + str(FORMAT%metrics_v3[c]["RMSE"]) + " -> " + str(FORMAT%metrics_v4[c]["RMSE"]))
         
     print()
+    
+    # Save final system equation to file
+    final_equation_path = os.path.join(estimate_dir, 'final_equation.txt')
+    with open(final_equation_path, 'w') as f:
+        for channel_id, channel_function in enumerate(model_function_v5):
+            # Format channel function strings
+            y_str_template, y_str_estimate, y_str_mappings = format_channel_function(channel_function, channel_id+1)
+            channel_str_detailed = y_str_template + '\n\n' + y_str_mappings + '\n\n' + y_str_estimate + '\n\n'
+            f.write(channel_str_detailed)
     
     print("Final estimation")
     print("============================================================")
