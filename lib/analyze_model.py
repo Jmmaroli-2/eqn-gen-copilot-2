@@ -537,32 +537,16 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
         # Print the completed equation for the current output channel.     
         if verbose: print("System equation")
         if verbose: print("============================================================")
-        
-        # Format channel function strings
-        y_str_template, y_str_estimate, y_str_mappings = format_channel_function(channel_function, channel_id)
-        
-        # Print template equation
-        print(y_str_template)
-        print()
-        
-        # Print template-to-estimate mapping
-        print(y_str_mappings)
-            
-        # Print estimate equation
-        print()
-        print(y_str_estimate)
-        print()
+        # Format channel function strings and print
+        y_str_template, y_str_estimate, y_str_mappings = format_channel_function(channel_function, channel_id+1)
+        channel_str_detailed = y_str_template + '\n\n' + y_str_mappings + '\n\n' + y_str_estimate + '\n'
+        print(channel_str_detailed)
 
         # Save to file if needed
         if save_data:
             equation_file_path = os.path.join(analysis_dir, 'system_equation.txt')
             with open(equation_file_path, 'a') as f:
-                f.write(y_str_template + '\n')
-                f.write('\n')
-                f.write(y_str_mappings + '\n')
-                f.write('\n')
-                f.write(y_str_estimate + '\n')
-                f.write('\n')
+                f.write(channel_str_detailed)
         
         model_function.append(channel_function)
                 

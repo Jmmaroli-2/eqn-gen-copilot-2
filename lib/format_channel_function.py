@@ -6,7 +6,7 @@ human-readable strings showing templates, estimates, and their mappings.
 """
 
 
-def format_channel_function(channel_function, channel_id):
+def format_channel_function(channel_function, channel_number):
     """
     Format a channel function into template, estimate, and mapping strings.
     
@@ -14,7 +14,7 @@ def format_channel_function(channel_function, channel_id):
         channel_function: List of product function dictionaries, each containing:
             - "template_string": String representing the function template
             - "estimate_string": String representing the estimated function (or None)
-        channel_id: Integer channel identifier (0-indexed)
+        channel_number: Output channel number
     
     Returns:
         tuple: Three strings:
@@ -37,8 +37,8 @@ def format_channel_function(channel_function, channel_id):
         f2(x2) = 2.3*x2
     """
     # Initialize strings for equations
-    y_str_template = "y" + str(channel_id+1) + "[k] = "
-    y_str_estimate = "y" + str(channel_id+1) + "[k] = "
+    y_str_template = "y" + str(channel_number) + "[k] = "
+    y_str_estimate = "y" + str(channel_number) + "[k] = "
 
     # Build the equations term by term
     for idf, product_function in enumerate(channel_function):
