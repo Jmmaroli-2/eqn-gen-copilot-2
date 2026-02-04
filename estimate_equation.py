@@ -109,7 +109,7 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
             print("============================================================")
             model_function_v1, new_mask = analyze_model(hf_analysis_parameters, model_dictionary_v1,
                                                         input_data, output_data, input_mask,
-                                                        output_dir=estimate_dir, subfolder_name='hf_analysis_initial')
+                                                        output_dir=estimate_dir, subfolder_name=f'hf{hf_loop_count}_analysis_initial')
             metrics_v1 = evaluate_function(model_function_v1, input_data, output_data)
             
             for channel_id, channel_metrics in enumerate(metrics_v1):
@@ -127,10 +127,10 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
             print(new_mask)
             print()
             model_dictionary_v2 = create_model(model_parameters, input_data, output_data, new_mask,
-                                              output_dir=estimate_dir, subfolder_name='hf_model_masked')
+                                              output_dir=estimate_dir, subfolder_name=f'hf{hf_loop_count}_model_masked')
             model_function_v2, _ = analyze_model(hf_analysis_parameters, model_dictionary_v2,
                                                  input_data, output_data, new_mask,
-                                                 output_dir=estimate_dir, subfolder_name='hf_analysis_masked')
+                                                 output_dir=estimate_dir, subfolder_name=f'hf{hf_loop_count}_analysis_masked')
             metrics_v2 = evaluate_function(model_function_v2, input_data, output_data)
         
             for channel_id, channel_metrics in enumerate(metrics_v2):
