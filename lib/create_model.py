@@ -46,7 +46,7 @@ FORMAT = '%.3e'
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-def create_model(model_parameters, inputData, outputData, inputMask=1):
+def create_model(model_parameters, inputData, outputData, inputMask=1, output_dir=None, subfolder_name=None):
     
     epochs = model_parameters["epochs"]                       # upper epoch limit
     cuda = model_parameters["cuda"]                           # use the GPU
@@ -79,12 +79,19 @@ def create_model(model_parameters, inputData, outputData, inputMask=1):
     
     # Get the current data output folder if saving data and plots.
     if save_visual:
-        if not os.path.exists('./output'):
-            os.mkdir('./output')
-        model_dir_count = 1
-        while os.path.exists('./output/model_{}'.format(model_dir_count)):
-            model_dir_count = model_dir_count + 1
-        os.mkdir('./output/model_{}'.format(model_dir_count))
+        if output_dir is not None and subfolder_name is not None:
+            # Use the provided output directory and subfolder name
+            model_dir = os.path.join(output_dir, subfolder_name)
+            os.mkdir(model_dir)
+        else:
+            # Fallback to legacy behavior for backward compatibility
+            if not os.path.exists('./output'):
+                os.mkdir('./output')
+            model_dir_count = 1
+            while os.path.exists('./output/model_{}'.format(model_dir_count)):
+                model_dir_count = model_dir_count + 1
+            model_dir = './output/model_{}'.format(model_dir_count)
+            os.mkdir(model_dir)
 
     # Create the TCN network.
     print("Initializing TCN model...")
@@ -229,7 +236,7 @@ def create_model(model_parameters, inputData, outputData, inputMask=1):
         plt.xlabel('Epoch')
         plt.ylabel('MSE Loss')
         ax.set_yscale("log", nonpositive='clip')
-        if save_visual == True: plt.savefig('./output/model_{}/loss.pdf'.format(model_dir_count))
+        if save_visual == True: plt.savefig(os.path.join(model_dir, 'loss.pdf'))
         if visual == True: plt.show()
     print("Min train: epoch " + str(np.argmin(trainLossHistory)+1))
     print("Min test: epoch " + str(np.argmin(testLossHistory)+1))

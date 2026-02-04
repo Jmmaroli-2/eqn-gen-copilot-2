@@ -21,7 +21,7 @@ from lib.evaluate_function import evaluate_function
 # Format of function parameters.
 FORMAT = '%.3e'
 
-def analyze_model(analysis_parameters, model_dictionary, input_data, output_data, input_mask=1):
+def analyze_model(analysis_parameters, model_dictionary, input_data, output_data, input_mask=1, output_dir=None, subfolder_name=None):
     
     functions = analysis_parameters["functions"]
     sweep_initial = analysis_parameters["sweep_initial"]
@@ -68,12 +68,19 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
     
     # Get the current data output folder if saving data and plots.
     if save_visual == True:
-        if not os.path.exists('./output'):
-            os.mkdir('./output')
-        analysis_dir_count = 1
-        while os.path.exists('./output/analysis_{}'.format(analysis_dir_count)):
-            analysis_dir_count = analysis_dir_count + 1
-        os.mkdir('./output/analysis_{}'.format(analysis_dir_count))
+        if output_dir is not None and subfolder_name is not None:
+            # Use the provided output directory and subfolder name
+            analysis_dir = os.path.join(output_dir, subfolder_name)
+            os.mkdir(analysis_dir)
+        else:
+            # Fallback to legacy behavior for backward compatibility
+            if not os.path.exists('./output'):
+                os.mkdir('./output')
+            analysis_dir_count = 1
+            while os.path.exists('./output/analysis_{}'.format(analysis_dir_count)):
+                analysis_dir_count = analysis_dir_count + 1
+            analysis_dir = './output/analysis_{}'.format(analysis_dir_count)
+            os.mkdir(analysis_dir)
 
     # Generate every possible combination of impulses.
     if history < history_eff:
@@ -413,7 +420,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
                                 
                     # Plot 2D and 3D data with fitted function for visual inspection.
                     if (save_visual or visual) and (arg_count == 1 or arg_count == 2):
-                        visual_dir = './output/analysis_{}/y{}_visuals'.format(analysis_dir_count, channel_id+1)
+                        visual_dir = os.path.join(analysis_dir, 'y{}_visuals'.format(channel_id+1))
                         os.makedirs(visual_dir, exist_ok=True)
                         
                         if arg_count == 1:
@@ -455,7 +462,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
                         # Calculate fitted output for all data points
                         y_fit = product_function["function"]["fcn"](x_data_fit, *product_function["parameters"])
                         
-                        with h5py.File('./output/analysis_{}/product_functions.h5'.format(analysis_dir_count), 'a') as f:
+                        with h5py.File(os.path.join(analysis_dir, 'product_functions.h5'), 'a') as f:
                             # Create a group for the channel if it doesn't exist
                             channel_grp = f.require_group(f'y{channel_id + 1}')
                             # Create a group for the product function
@@ -571,7 +578,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
 
         # Save to file if needed
         if save_visual:
-            equation_file_path = './output/analysis_{}/system_equation.txt'.format(analysis_dir_count)
+            equation_file_path = os.path.join(analysis_dir, 'system_equation.txt')
             with open(equation_file_path, 'a') as f:
                 f.write(y_str_template + '\n')
                 f.write('\n')

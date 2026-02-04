@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from lib.evaluate_function import evaluate_function
 
-def tune_model(tuning_parameters, model_function, input_data, output_data):
+def tune_model(tuning_parameters, model_function, input_data, output_data, output_dir=None):
     
     population_size = tuning_parameters["ga_population"]
     generation_count = tuning_parameters["ga_generations"]
@@ -22,14 +22,20 @@ def tune_model(tuning_parameters, model_function, input_data, output_data):
     
     if save_visual == True:
         # Setup the most recent analysis directory to store GA tuning metrics.
-        if not os.path.exists('./output'):
-            os.mkdir('./output')
-        analysis_dir_count = 1
-        while os.path.exists('./output/analysis_{}'.format(analysis_dir_count)):
-            analysis_dir_count = analysis_dir_count + 1
-        analysis_dir_count = analysis_dir_count - 1
-        if not os.path.exists('./output/analysis_{}'.format(analysis_dir_count)):
-            os.mkdir('./output/analysis_{}'.format(analysis_dir_count))
+        if output_dir is not None:
+            # Use the provided output directory
+            analysis_dir = output_dir
+        else:
+            # Fallback to legacy behavior: use the most recent analysis directory
+            if not os.path.exists('./output'):
+                os.mkdir('./output')
+            analysis_dir_count = 1
+            while os.path.exists('./output/analysis_{}'.format(analysis_dir_count)):
+                analysis_dir_count = analysis_dir_count + 1
+            analysis_dir_count = analysis_dir_count - 1
+            analysis_dir = './output/analysis_{}'.format(analysis_dir_count)
+            if not os.path.exists(analysis_dir):
+                os.mkdir(analysis_dir)
     
     # Tune each channel individually.
     model_function_tuned = copy.deepcopy(model_function)
@@ -127,7 +133,7 @@ def tune_model(tuning_parameters, model_function, input_data, output_data):
             plt.title('Top MAE vs Generation')
             plt.xlabel('Generation')
             plt.ylabel('MAE')
-            if save_visual == True: plt.savefig('./output/analysis_{}/ga_mae.pdf'.format(analysis_dir_count))
+            if save_visual == True: plt.savefig(os.path.join(analysis_dir, 'ga_mae.pdf'))
             if visual == True: plt.show()
         
     return model_function_tuned
