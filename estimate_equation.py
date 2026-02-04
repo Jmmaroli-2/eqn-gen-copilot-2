@@ -186,6 +186,7 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
                                    output_dir=estimate_dir)
     metrics_v4 = evaluate_function(model_function_v4, input_data, output_data)
     
+    # Examine the GA tuned equation for each channel for improvement.
     model_function_v5 = []
     metrics_v5 = []
     for c in range(0,len(metrics_v4)):
@@ -206,7 +207,7 @@ def estimate_equation(model_parameters, analysis_parameters, tuning_parameters, 
     
     print("Final estimation")
     print("============================================================")
-    # Print final equations.
+    # Print final system equations.
     for idc, channel_function in enumerate(model_function_v5):
         y_str = "y" + str(idc+1) + "[k] = "
         for idf, product_function in enumerate(channel_function):
