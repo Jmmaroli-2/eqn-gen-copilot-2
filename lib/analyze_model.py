@@ -17,6 +17,7 @@ import h5py
 import os
 
 from lib.evaluate_function import evaluate_function
+from lib.format_channel_function import format_channel_function
 
 # Format of function parameters.
 FORMAT = '%.3e'
@@ -536,34 +537,16 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
         # Print the completed equation for the current output channel.     
         if verbose: print("System equation")
         if verbose: print("============================================================")
-        # Initialize strings for equations
-        y_str_template = "y" + str(channel_id+1) + "[k] = "
-        y_str_estimate = "y" + str(channel_id+1) + "[k] = "
-
-        # Build the equations term by term
-        for idf, product_function in enumerate(channel_function):
-            template = product_function["template_string"]
-            estimate = product_function["estimate_string"] if product_function["estimate_string"] is not None else "0"
-
-            # Append to the main template equation
-            y_str_template += template
-            # Append to the main estimate equation
-            y_str_estimate += estimate
-
-            # Add " + " if not the last term
-            if idf < len(channel_function) - 1:
-                y_str_template += " + "
-                y_str_estimate += " + "
-
+        
+        # Format channel function strings
+        y_str_template, y_str_estimate, y_str_mappings = format_channel_function(channel_function, channel_id)
+        
         # Print template equation
         print(y_str_template)
         print()
-
+        
         # Print template-to-estimate mapping
-        for product_function in channel_function:
-            template = product_function["template_string"]
-            estimate = product_function["estimate_string"] if product_function["estimate_string"] is not None else "0"
-            print(f"{template} = {estimate}")
+        print(y_str_mappings)
             
         # Print estimate equation
         print()
@@ -576,10 +559,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
             with open(equation_file_path, 'a') as f:
                 f.write(y_str_template + '\n')
                 f.write('\n')
-                for product_function in channel_function:
-                    template = product_function["template_string"]
-                    estimate = product_function["estimate_string"] if product_function["estimate_string"] is not None else "0"
-                    f.write(f"{template} = {estimate}\n")
+                f.write(y_str_mappings + '\n')
                 f.write('\n')
                 f.write(y_str_estimate + '\n')
                 f.write('\n')
