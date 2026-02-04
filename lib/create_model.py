@@ -82,7 +82,7 @@ def create_model(model_parameters, inputData, outputData, inputMask=1, output_di
         if output_dir is not None and subfolder_name is not None:
             # Use the provided output directory and subfolder name
             model_dir = os.path.join(output_dir, subfolder_name)
-            os.mkdir(model_dir)
+            os.makedirs(model_dir, exist_ok=True)
         else:
             # Fallback to legacy behavior for backward compatibility
             if not os.path.exists('./output'):

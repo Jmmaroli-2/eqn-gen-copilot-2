@@ -71,7 +71,7 @@ def analyze_model(analysis_parameters, model_dictionary, input_data, output_data
         if output_dir is not None and subfolder_name is not None:
             # Use the provided output directory and subfolder name
             analysis_dir = os.path.join(output_dir, subfolder_name)
-            os.mkdir(analysis_dir)
+            os.makedirs(analysis_dir, exist_ok=True)
         else:
             # Fallback to legacy behavior for backward compatibility
             if not os.path.exists('./output'):
